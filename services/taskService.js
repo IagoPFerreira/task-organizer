@@ -1,56 +1,51 @@
+/* eslint-disable object-curly-newline */
 const model = require('../models/taskModel');
-const {
-  NO_REGISTRED_TASKS, TASK_NOT_FOUND, INVALID_ENTRIES, SERVER_ERROR,
-} = require('../messages/errorMessages');
+const { INVALID_ENTRIES } = require('../messages/errorMessages');
 
 const getAllTasks = async ({ role, userId }) => {
   const tasks = role === 'admin' ? await model.getAllTasks() : await model.getTasksByUserId(userId);
 
-  if (!tasks) return ({ status: 404, data: NO_REGISTRED_TASKS });
+  if (!tasks) return false;
 
-  return ({ status: 200, data: tasks });
+  return tasks;
 };
 
-const getTaskById = async (id) => {
-  const task = await model.getTaskById(id);
+const getTaskById = async (taskId, userId) => {
+  const task = await model.getTaskById(taskId, userId);
 
-  if (!task) return ({ status: 404, data: TASK_NOT_FOUND });
+  if (!task) return false;
 
-  return ({ status: 200, data: task });
+  return (task);
 };
 
 const insertTask = async ({ name, status }, { userId }) => {
-  if (!name || !status) return ({ status: 400, data: INVALID_ENTRIES });
+  if (!name || !status) return ({ message: INVALID_ENTRIES });
 
   const task = await model.insertTask(name, status, userId);
 
-  if (!task) return ({ status: 500, data: SERVER_ERROR });
+  if (!task) return false;
 
-  return ({ status: 201, data: task });
+  return (task);
 };
 
-const updateTask = async (id, { name, status, date }) => {
-  if (!name || !status || !id) {
-    return (
-      { status: 400, data: INVALID_ENTRIES }
-    );
-  }
+const updateTask = async ({ _id: taskId, name, status, date }, { userId }) => {
+  if (!name || !status || !taskId) return ({ message: INVALID_ENTRIES });
 
-  const task = await model.updateTask(id, { name, status, date });
+  const task = await model.updateTask(taskId, { name, status, date }, userId);
 
-  if (!task) return ({ status: 404, data: TASK_NOT_FOUND });
+  if (!task) return false;
 
-  return ({ status: 200, data: task });
+  return (task);
 };
 
-const deleteTask = async (id) => {
-  if (!id) return ({ status: 400, data: INVALID_ENTRIES });
+const deleteTask = async (taskId, userId) => {
+  if (!taskId) return ({ message: INVALID_ENTRIES });
 
-  const task = await model.deleteTask(id);
+  const task = await model.deleteTask(taskId, userId);
 
-  if (!task) return ({ status: 404, data: TASK_NOT_FOUND });
+  if (!task) return false;
 
-  return ({ status: 204 });
+  return true;
 };
 
 module.exports = {

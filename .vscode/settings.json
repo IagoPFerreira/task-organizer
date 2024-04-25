@@ -1,5 +1,9 @@
 {
   "conventionalCommits.scopes": [
-    "back-end"
+    "back-end",
+    "middlewares",
+    "tasks",
+    "users",
+    "tests"
   ]
 }

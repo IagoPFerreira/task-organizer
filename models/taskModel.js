@@ -19,8 +19,9 @@ const getTasksByUserId = async (userId) => {
   return tasks;
 };
 
-const getTaskById = async (id) => {
-  const task = await connection().then((db) => db.collection(coll).findOne({ _id: ObjectId(id) }));
+const getTaskById = async (taskId, userId) => {
+  const task = await connection().then((db) => db.collection(coll)
+    .findOne({ _id: ObjectId(taskId), userId }));
 
   if (!task) return null;
 
@@ -42,22 +43,25 @@ const insertTask = async (name, status, userId) => {
   return task;
 };
 
-const updateTask = async (id, body) => {
-  await connection()
-    .then((db) => db.collection(coll).updateOne({ _id: ObjectId(id) }, { $set: { ...body } }));
+const updateTask = async (taskId, body, userId) => {
+  const { result } = await connection()
+    .then((db) => db.collection(coll)
+      .updateOne({ _id: ObjectId(taskId), userId }, { $set: { ...body } }));
 
-  const task = await getTaskById(id);
+  if (result.n === 0) return false;
+
+  const task = await getTaskById(taskId, userId);
 
   return task;
 };
 
-const deleteTask = async (id) => {
-  const taskToBeDeleted = await getTaskById(id);
+const deleteTask = async (id, userId) => {
+  const taskToBeDeleted = await getTaskById(id, userId);
 
   if (!taskToBeDeleted) return null;
 
   await connection()
-    .then((db) => db.collection(coll).deleteOne({ _id: ObjectId(id) }));
+    .then((db) => db.collection(coll).deleteOne({ _id: ObjectId(id), userId }));
 
   const deletedTask = await getTaskById(id);
 
